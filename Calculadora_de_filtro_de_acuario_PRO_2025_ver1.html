@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Calculadora de Filtro — Flow & Turnover Tu Acuario en Casa</title>
+<img src="logo_tu_acuario.png" alt="Logo" class="logo-superior">
+<style>
+  body{font-family:system-ui;margin:0;background:#041220;color:#e6eef6}
+  .wrap{max-width:1100px;margin:20px auto;padding:18px}
+  .card{background:#071827;border-radius:12px;padding:14px;margin-top:12px;box-shadow:0 6px 30px rgba(2,6,23,0.6)}
+  .row{display:flex;gap:10px}
+  .col{flex:1}
+  input,select{width:100%;padding:8px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.06)}
+  table{width:100%;margin-top:8px;border-collapse:collapse}
+  th,td{padding:6px;font-size:13px;color:inherit}
+  .btn{background:#22c1c3;color:#042028;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+  .output{font-size:16px;font-weight:600;margin-top:4px}
+  .fade-reset{animation:flash .5s ease}
+  @keyframes flash{0%{background:#ffffff22;}100%{background:transparent;}}
+  /* selects azul oscuro */
+  select#speciesSelect, select#plantation, select#filterType, select#correction {
+    background-color:#002a4d;
+    color:#e6eef6;
+    border:1px solid rgba(255,255,255,0.06);
+    padding:8px;border-radius:8px;
+  }
+  .logo-superior {
+  position: fixed;      /* Permite ubicarla en la esquina */
+  top: 10px;            /* Margen superior */
+  right: 10px;          /* Margen derecho */
+  width: 120px;         /* Tamaño del logo (puedes ajustarlo) */
+  z-index: 9999;        /* Siempre por encima del contenido */
+  pointer-events: none; /* Para que no interfiera con los clics */
+}
+</style>
+</head>
+<body>
+
+<button id="resetBtn" class="btn" style="margin:12px">Reiniciar página</button>
+
+<div class="wrap" id="wrapBox">
+  <h2>Calculadora de Filtro — Flow & Turnover — Tu Acuario en Casa</h2>
+
+  <!-- DIMENSIONES -->
+  <div class="card">
+    <h4>1) Dimensiones & volúmenes</h4>
+    <div class="row">
+      <div class="col"><label>Largo (cm)</label><input id="length" type="number" value="75"></div>
+      <div class="col"><label>Ancho (cm)</label><input id="width" type="number" value="32"></div>
+      <div class="col"><label>Alto (cm)</label><input id="height" type="number" value="43"></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div class="col"><label>Espesor sustrato (cm)</label><input id="substrate" type="number" value="4" step="0.1"></div>
+      <div class="col"><label>Vol decoraciones (L)</label><input id="decor" type="number" value="5" step="0.1"></div>
+    </div>
+  </div>
+
+  <!-- ESPECIES -->
+  <div class="card">
+    <h4>2) Especies (hasta 10)</h4>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <select id="speciesSelect"><option value="">-- Elige morfología --</option></select>
+      <button id="addSpecies" class="btn">Agregar especie</button>
+      <div style="margin-left:auto" class="mini">Los campos aparecen al agregar una especie.</div>
+    </div>
+
+    <table id="speciesTable">
+      <thead><tr><th>Especie</th><th>Cant.</th><th>L (cm)</th><th>A</th><th>B</th><th>Biomasa (g)</th><th></th></tr></thead>
+      <tbody id="speciesBody"></tbody>
+    </table>
+  </div>
+
+  <!-- CONDICIONES -->
+  <div class="card">
+    <h4>3) Condiciones & ajustes</h4>
+    <div class="row">
+      <div class="col"><label>Temperatura (°C)</label><input id="temp" type="number" value="28" step="0.1"></div>
+      <div class="col"><label>pH</label><input id="ph" type="number" value="7" step="0.1"></div>
+      <div class="col"><label>Comidas por día</label><input id="meals" type="number" value="4" min="1"></div>
+    </div>
+
+    <div class="row" style="margin-top:8px">
+      <div class="col"><label>Plantación</label><select id="plantation"><option value="">--Elige--</option><option>Sin plantación</option><option selected>Plantación moderada</option><option>Plantación intensiva</option></select></div>
+      <div class="col"><label>Tipo de filtro</label><select id="filterType"><option value="">--Elige--</option><option>Canister</option><option>Cascada</option><option>Sump</option><option>Interno</option><option>Otro</option></select></div>
+      <div class="col"><label>Altura elevación (cm)</label><input id="lift" type="number" value="0" min="0"></div>
+    </div>
+
+    <div class="row" style="margin-top:8px">
+      <div class="col"><label>Corrección: Factor para corregir perdidas de rendimiento del sistema (resistencia hidráulica, sobrecarga biológica, caudal real, mantenimiento, etc.)</label><select id="correction"><option>Sin Corrección</option><option>Corrección Moderada</option><option>Corrección Alta</option></select></div>
+    </div>
+  </div>
+
+  <!-- RESULTADOS -->
+  <div class="card">
+    <h4>Resultados</h4>
+    <div class="row">
+      <div class="col"><div class="mini">Volumen bruto (L)</div><div id="volGross" class="output">-</div></div>
+      <div class="col"><div class="mini">Volumen substr + decor (L)</div><div id="volSubstrate" class="output">-</div></div>
+      <div class="col"><div class="mini">Volumen neto (L)</div><div id="volNet" class="output">-</div></div>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <div class="col"><div class="mini">Biomasa total (g)</div><div id="biomassTotal" class="output">-</div></div>
+      <div class="col"><div class="mini">Biomasa g/L</div><div id="biomassPerL" class="output">-</div></div>
+      <div class="col"><div class="mini">Factor base flujo (x)</div><div id="flowFactor" class="output">-</div></div>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <div class="col"><div class="mini">Flujo base (L/h)</div><div id="flowBase" class="output">-</div></div>
+      <div class="col"><div class="mini">Flujo real recomendado (L/h)</div><div id="flowReal" class="output">-</div></div>
+      <div class="col"><div class="mini">Rotaciones (h⁻¹)</div><div id="rotations" class="output">-</div></div>
+    </div>
+
+    <div style="margin-top:10px" class="mini" id="observations">-</div>
+  </div>
+</div>
+
+<script>
+const presets = [
+  {forma: "Alargado / Delgado", A: 0.007, B: 2.9},
+  {forma: "Muy Alargado", A: 0.00075, B: 2.68},
+  {forma: "Estándar /Torpedo", A: 0.012, B: 3.05},
+  {forma: "Comprimido Lateralmente", A: 0.0225, B: 3.2},
+  {forma: "Robusto / Redondeado", A: 0.04, B: 3.5},
+  {forma: "Muy Robusto / Ovalado", A: 0.03, B: 3.3}
+];
+
+function populateSelect(){
+  const sel=document.getElementById('speciesSelect');
+  sel.innerHTML = '<option value="">-- Elige morfología --</option>';
+  presets.forEach((p,i)=>{
+    const opt=document.createElement('option');
+    opt.value = i;
+    opt.text = `${p.forma} — A=${p.A} B=${p.B}`;
+    sel.appendChild(opt);
+  });
+}
+
+let speciesCount = 0;
+const maxSpecies = 10;
+
+function addSpeciesRow(presetIndex){
+  if(speciesCount>=maxSpecies) return alert("Máximo 10 especies alcanzado.");
+  speciesCount++;
+  const tbody = document.getElementById('speciesBody');
+  const tr = document.createElement('tr'); tr.id = 'row_' + speciesCount;
+  tr.innerHTML = `
+    <td><input type="text" id="name_${speciesCount}" placeholder="Nombre (opcional)" /></td>
+    <td><input type="number" id="qty_${speciesCount}" value="1" min="0" step="1" /></td>
+    <td><input type="number" id="len_${speciesCount}" value="5" min="0" step="0.1" /></td>
+    <td><input type="number" id="A_${speciesCount}" step="0.00001" /></td>
+    <td><input type="number" id="B_${speciesCount}" step="0.01" /></td>
+    <td><div id="bio_${speciesCount}" class="mini">0</div></td>
+    <td><button class="btn" onclick="removeRow('row_${speciesCount}')">Eliminar</button></td>
+  `;
+  tbody.appendChild(tr);
+
+  if(presetIndex !== "" && presets[Number(presetIndex)]){
+    document.getElementById(`A_${speciesCount}`).value = presets[Number(presetIndex)].A;
+    document.getElementById(`B_${speciesCount}`).value = presets[Number(presetIndex)].B;
+  }
+
+  ['qty','len','A','B'].forEach(k=>{
+    const el=document.getElementById(`${k}_${speciesCount}`);
+    if(el){ el.addEventListener('input', recalc); el.addEventListener('change', recalc); }
+  });
+
+  queueMicrotask(recalc);
+}
+
+function removeRow(id){
+  const el = document.getElementById(id);
+  if(el) el.remove();
+  const rows = document.querySelectorAll('[id^="row_"]');
+  speciesCount = rows.length;
+  recalc();
+}
+
+function computeFlowFactor(b43){
+  if(!isFinite(b43) || b43<=0) return 2;
+  if(b43<1) return 2.7;
+  if(b43<2) return 3.4;
+  if(b43<3) return 4.1;
+  if(b43<4) return 4.8;
+  if(b43<5) return 5.5;
+  if(b43<6) return 6.2;
+  if(b43<7) return 6.9;
+  return 7.5;
+}
+
+function filterPercent(ft){
+  if(ft==="Canister") return 15;
+  if(ft==="Cascada") return 22;
+  if(ft==="Sump") return 5;
+  if(ft==="Interno") return 27;
+  return 30;
+}
+
+function plantationPercent(p){
+  if(p==="Sin plantación") return 0;
+  if(p==="Plantación moderada") return -15;
+  if(p==="Plantación intensiva") return -30;
+  return 0;
+}
+
+function correctionMultiplier(c){
+  if(c==="Sin Corrección") return 1;
+  if(c==="Corrección Moderada") return 1.1;
+  if(c==="Corrección Alta") return 1.2;
+  return 1;
+}
+
+function recalc(){
+  // volumes
+  const L = Number(document.getElementById('length').value)||0;
+  const W = Number(document.getElementById('width').value)||0;
+  const H = Number(document.getElementById('height').value)||0;
+  const substrate_cm = Number(document.getElementById('substrate').value)||0;
+  const decor = Number(document.getElementById('decor').value)||0;
+  const volGross = (L*W*H)/1000;
+  const volSubstrate = (L*W*substrate_cm)/1000 + decor;
+  const volNet = volGross - volSubstrate;
+  document.getElementById('volGross').innerText = volGross.toFixed(2);
+  document.getElementById('volSubstrate').innerText = volSubstrate.toFixed(2);
+  document.getElementById('volNet').innerText = volNet.toFixed(2);
+
+  // biomassa per row
+  let totalBio = 0;
+  for(let i=1;i<=maxSpecies;i++){
+    const row = document.getElementById('row_' + i);
+    if(!row) continue;
+    const qty = Number(document.getElementById(`qty_${i}`).value) || 0;
+    const len = Number(document.getElementById(`len_${i}`).value) || 0;
+    const A = Number(document.getElementById(`A_${i}`).value) || 0;
+    const B = Number(document.getElementById(`B_${i}`).value) || 0;
+    let bio = 0;
+    if(qty>0 && A>0 && B>0 && len>0){
+      bio = Math.round(qty * A * Math.pow(len, B));
+    }
+    const bioEl = document.getElementById(`bio_${i}`);
+    if(bioEl) bioEl.innerText = bio;
+    totalBio += bio;
+  }
+
+  document.getElementById('biomassTotal').innerText = totalBio.toFixed(0);
+  const b41 = volNet || 0.0000001;
+  const b42 = totalBio;
+  const b43 = b42 / b41;
+  document.getElementById('biomassPerL').innerText = (b43).toFixed(4);
+
+  const b44 = computeFlowFactor(b43);
+  document.getElementById('flowFactor').innerText = b44;
+
+  const b45 = (Number(document.getElementById('temp').value)||0) > 27 ? ((Number(document.getElementById('temp').value)||0)-27)*5 : 0;
+  const b46 = (Number(document.getElementById('ph').value)||0) < 6.5 ? 30 : 0;
+  const meals = Number(document.getElementById('meals').value)||0;
+  const b47 = meals===1?0:(meals-1)*10;
+  const b48 = plantationPercent(document.getElementById('plantation').value);
+  const b49 = (Number(document.getElementById('lift').value)||0)/30*10;
+  const b50 = filterPercent(document.getElementById('filterType').value);
+
+  const b51 = b41 * b44;
+  const b52 = b51 * (1 + b45/100) * (1 + b46/100) * (1 + b47/100) * (1 + b48/100) * (1 + b49/100) * (1 + b50/100) * correctionMultiplier(document.getElementById('correction').value);
+
+  // rotations per hour
+  const rotCandidate = b52 / b41;
+  
+<!-- viejo calculo de rotacion -->
+<!-- const rotMinMax = Math.min(10, Math.max(2, 2 + 4.5 * b43)); -->
+  
+<!-- Nuevo calculo de rotacion -->
+const rotMinMax = Math.min(
+  10,
+  Math.max(
+    2,
+    1.5 * b43 + 0.5 * correctionMultiplier(document.getElementById('correction').value) - 0.3 * plantationPercent(document.getElementById('plantation').value)
+  )
+);
+  <!-- fin nuevo calculo de rotacion -->
+
+const b53 = Math.min(rotCandidate, rotMinMax);
+
+  document.getElementById('flowBase').innerText = b51.toFixed(2);
+  document.getElementById('flowReal').innerText = b52.toFixed(2);
+  document.getElementById('rotations').innerText = b53.toFixed(3);
+
+  // observations
+  let obs = "";
+  if(Number(document.getElementById('ph').value) < 6.5) obs = "pH muy bajo: Nitrospiras pueden verse afectadas. Revisa correcciones de pH.";
+  else obs = "Sistema equilibrado. Mantén monitoreo regular.";
+  document.getElementById('observations').innerText = obs;
+}
+
+function resetAll(){
+  const wrap=document.getElementById('wrapBox');
+  wrap.classList.remove('fade-reset');
+  void wrap.offsetWidth;
+  wrap.classList.add('fade-reset');
+
+  document.querySelectorAll('input[type="number"]').forEach(el=> el.value = 0);
+  document.querySelectorAll('select').forEach(s=> s.selectedIndex = 0);
+  const tbody=document.getElementById('speciesBody'); while(tbody.firstChild) tbody.removeChild(tbody.firstChild);
+  speciesCount = 0;
+  recalc();
+}
+
+function attachRecalcListeners(){
+  const ids=['length','width','height','substrate','decor','temp','ph','meals','plantation','filterType','lift','correction'];
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.addEventListener('input',recalc); el.addEventListener('change',recalc); }
+  });
+  document.getElementById('speciesSelect').addEventListener('change', ()=>{});
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  populateSelect();
+  document.getElementById('addSpecies').addEventListener('click', ()=> addSpeciesRow(document.getElementById('speciesSelect').value, false));
+  document.getElementById('resetBtn').addEventListener('click', resetAll);
+  attachRecalcListeners();
+  recalc();
+});
+</script>
+</body>
+</html>
+
