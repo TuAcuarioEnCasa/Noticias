@@ -32,12 +32,10 @@
   /* Tamaño responsivo */
   width: clamp(70px, 12vw, 150px);
 
-  height: auto;              /* Mantiene proporciones reales */
+  height: auto;
   z-index: 9999;
   pointer-events: none;
-  object-fit: contain;       /* Asegura proporciones perfectas */
-
-  /* Suavidad visual */
+  object-fit: contain;
   filter: drop-shadow(0 0 6px rgba(0,0,0,0.6));
 }
 </style>
@@ -127,35 +125,35 @@
 </div>
 
 <script>
-const presets = [
-  {forma: "Alargado / Delgado", A: 0.007, B: 2.9},
-  {forma: "Muy Alargado", A: 0.00075, B: 2.68},
-  {forma: "Estándar /Torpedo", A: 0.012, B: 3.05},
-  {forma: "Comprimido Lateralmente", A: 0.0225, B: 3.2},
-  {forma: "Robusto / Redondeado", A: 0.04, B: 3.5},
-  {forma: "Muy Robusto / Ovalado", A: 0.03, B: 3.3}
+const presets=[
+  {forma:"Alargado / Delgado",A:0.007,B:2.9},
+  {forma:"Muy Alargado",A:0.00075,B:2.68},
+  {forma:"Estándar /Torpedo",A:0.012,B:3.05},
+  {forma:"Comprimido Lateralmente",A:0.0225,B:3.2},
+  {forma:"Robusto / Redondeado",A:0.04,B:3.5},
+  {forma:"Muy Robusto / Ovalado",A:0.03,B:3.3}
 ];
 
 function populateSelect(){
   const sel=document.getElementById('speciesSelect');
-  sel.innerHTML = '<option value="">-- Elige morfología --</option>';
+  sel.innerHTML='<option value="">-- Elige morfología --</option>';
   presets.forEach((p,i)=>{
     const opt=document.createElement('option');
-    opt.value = i;
-    opt.text = `${p.forma} — A=${p.A} B=${p.B}`;
+    opt.value=i;
+    opt.text=`${p.forma} — A=${p.A} B=${p.B}`;
     sel.appendChild(opt);
   });
 }
 
-let speciesCount = 0;
-const maxSpecies = 10;
+let speciesCount=0;
+const maxSpecies=10;
 
 function addSpeciesRow(presetIndex){
   if(speciesCount>=maxSpecies) return alert("Máximo 10 especies alcanzado.");
   speciesCount++;
-  const tbody = document.getElementById('speciesBody');
-  const tr = document.createElement('tr'); tr.id = 'row_' + speciesCount;
-  tr.innerHTML = `
+  const tbody=document.getElementById('speciesBody');
+  const tr=document.createElement('tr'); tr.id='row_'+speciesCount;
+  tr.innerHTML=`
     <td><input type="text" id="name_${speciesCount}" placeholder="Nombre (opcional)" /></td>
     <td><input type="number" id="qty_${speciesCount}" value="1" min="0" step="1" /></td>
     <td><input type="number" id="len_${speciesCount}" value="5" min="0" step="0.1" /></td>
@@ -166,29 +164,29 @@ function addSpeciesRow(presetIndex){
   `;
   tbody.appendChild(tr);
 
-  if(presetIndex !== "" && presets[Number(presetIndex)]){
-    document.getElementById(`A_${speciesCount}`).value = presets[Number(presetIndex)].A;
-    document.getElementById(`B_${speciesCount}`).value = presets[Number(presetIndex)].B;
+  if(presetIndex!=="" && presets[Number(presetIndex)]){
+    document.getElementById(`A_${speciesCount}`).value=presets[Number(presetIndex)].A;
+    document.getElementById(`B_${speciesCount}`).value=presets[Number(presetIndex)].B;
   }
 
   ['qty','len','A','B'].forEach(k=>{
     const el=document.getElementById(`${k}_${speciesCount}`);
-    if(el){ el.addEventListener('input', recalc); el.addEventListener('change', recalc); }
+    if(el){ el.addEventListener('input',recalc); el.addEventListener('change',recalc); }
   });
 
   queueMicrotask(recalc);
 }
 
 function removeRow(id){
-  const el = document.getElementById(id);
+  const el=document.getElementById(id);
   if(el) el.remove();
-  const rows = document.querySelectorAll('[id^="row_"]');
-  speciesCount = rows.length;
+  const rows=document.querySelectorAll('[id^="row_"]');
+  speciesCount=rows.length;
   recalc();
 }
 
 function computeFlowFactor(b43){
-  if(!isFinite(b43) || b43<=0) return 2;
+  if(!isFinite(b43)||b43<=0) return 2;
   if(b43<1) return 2.7;
   if(b43<2) return 3.4;
   if(b43<3) return 4.1;
@@ -223,83 +221,83 @@ function correctionMultiplier(c){
 
 function recalc(){
   // volumes
-  const L = Number(document.getElementById('length').value)||0;
-  const W = Number(document.getElementById('width').value)||0;
-  const H = Number(document.getElementById('height').value)||0;
-  const substrate_cm = Number(document.getElementById('substrate').value)||0;
-  const decor = Number(document.getElementById('decor').value)||0;
-  const volGross = (L*W*H)/1000;
-  const volSubstrate = (L*W*substrate_cm)/1000 + decor;
-  const volNet = volGross - volSubstrate;
-  document.getElementById('volGross').innerText = volGross.toFixed(2);
-  document.getElementById('volSubstrate').innerText = volSubstrate.toFixed(2);
-  document.getElementById('volNet').innerText = volNet.toFixed(2);
+  const L=Number(document.getElementById('length').value)||0;
+  const W=Number(document.getElementById('width').value)||0;
+  const H=Number(document.getElementById('height').value)||0;
+  const substrate_cm=Number(document.getElementById('substrate').value)||0;
+  const decor=Number(document.getElementById('decor').value)||0;
+  const volGross=(L*W*H)/1000;
+  const volSubstrate=(L*W*substrate_cm)/1000+decor;
+  const volNet=volGross-volSubstrate;
+  document.getElementById('volGross').innerText=volGross.toFixed(2);
+  document.getElementById('volSubstrate').innerText=volSubstrate.toFixed(2);
+  document.getElementById('volNet').innerText=volNet.toFixed(2);
 
   // biomassa per row
-  let totalBio = 0;
+  let totalBio=0;
   for(let i=1;i<=maxSpecies;i++){
-    const row = document.getElementById('row_' + i);
+    const row=document.getElementById('row_'+i);
     if(!row) continue;
-    const qty = Number(document.getElementById(`qty_${i}`).value) || 0;
-    const len = Number(document.getElementById(`len_${i}`).value) || 0;
-    const A = Number(document.getElementById(`A_${i}`).value) || 0;
-    const B = Number(document.getElementById(`B_${i}`).value) || 0;
-    let bio = 0;
-    if(qty>0 && A>0 && B>0 && len>0){
-      bio = Math.round(qty * A * Math.pow(len, B));
-    }
-    const bioEl = document.getElementById(`bio_${i}`);
-    if(bioEl) bioEl.innerText = bio;
-    totalBio += bio;
+    const qty=Number(document.getElementById(`qty_${i}`).value)||0;
+    const len=Number(document.getElementById(`len_${i}`).value)||0;
+    const A=Number(document.getElementById(`A_${i}`).value)||0;
+    const B=Number(document.getElementById(`B_${i}`).value)||0;
+    let bio=0;
+    if(qty>0 && A>0 && B>0 && len>0) bio=Math.round(qty*A*Math.pow(len,B));
+    const bioEl=document.getElementById(`bio_${i}`);
+    if(bioEl) bioEl.innerText=bio;
+    totalBio+=bio;
   }
 
-  document.getElementById('biomassTotal').innerText = totalBio.toFixed(0);
-  const b41 = volNet || 0.0000001;
-  const b42 = totalBio;
-  const b43 = b42 / b41;
-  document.getElementById('biomassPerL').innerText = (b43).toFixed(4);
+  document.getElementById('biomassTotal').innerText=totalBio.toFixed(0);
+  const b41=volNet||0.0000001;
+  const b42=totalBio;
+  const b43=b42/b41;
+  document.getElementById('biomassPerL').innerText=(b43).toFixed(4);
 
-  const b44 = computeFlowFactor(b43);
-  document.getElementById('flowFactor').innerText = b44;
+  const b44=computeFlowFactor(b43);
+  document.getElementById('flowFactor').innerText=b44;
 
-  const b45 = (Number(document.getElementById('temp').value)||0) > 27 ? ((Number(document.getElementById('temp').value)||0)-27)*5 : 0;
-  const b46 = (Number(document.getElementById('ph').value)||0) < 6.5 ? 30 : 0;
-  const meals = Number(document.getElementById('meals').value)||0;
-  const b47 = meals===1?0:(meals-1)*10;
-  const b48 = plantationPercent(document.getElementById('plantation').value);
-  const b49 = (Number(document.getElementById('lift').value)||0)/30*10;
-  const b50 = filterPercent(document.getElementById('filterType').value);
+  const b45=(Number(document.getElementById('temp').value)||0)>27 ? ((Number(document.getElementById('temp').value)||0)-27)*5 : 0;
+  const b46=(Number(document.getElementById('ph').value)||0)<6.5 ? 30 : 0;
+  const meals=Number(document.getElementById('meals').value)||0;
+  const b47=meals===1?0:(meals-1)*10;
+  const b48=plantationPercent(document.getElementById('plantation').value);
+  const b49=(Number(document.getElementById('lift').value)||0)/30*10;
+  const b50=filterPercent(document.getElementById('filterType').value);
 
-  const b51 = b41 * b44;
-  const b52 = b51 * (1 + b45/100) * (1 + b46/100) * (1 + b47/100) * (1 + b48/100) * (1 + b49/100) * (1 + b50/100) * correctionMultiplier(document.getElementById('correction').value);
+  const b51=b41*b44;
+  const b52=b51*(1+b45/100)*(1+b46/100)*(1+b47/100)*(1+b48/100)*(1+b49/100)*(1+b50/100)*correctionMultiplier(document.getElementById('correction').value);
 
-  // rotations per hour
-  const rotCandidate = b52 / b41;
-  
-// viejo calculo de rotacion 
-// const rotMinMax = Math.min(10, Math.max(2, 2 + 4.5 * b43)); 
-  
-// Nuevo calculo de rotacion 
-const rotMinMax = Math.min(
-  10,
-  Math.max(
-    2,
-    1.5 * b43 + 0.5 * correctionMultiplier(document.getElementById('correction').value) - 0.3 * plantationPercent(document.getElementById('plantation').value)
-  )
-);
-// fin nuevo calculo de rotacion 
+  // rotations
+  const rotCandidate=b52/b41;
 
-const b53 = Math.min(rotCandidate, rotMinMax);
+  const rotMinMax=Math.min(
+    10,
+    Math.max(
+      2,
+      1.5*b43+0.5*correctionMultiplier(document.getElementById('correction').value) - 0.3*plantationPercent(document.getElementById('plantation').value)
+    )
+  );
 
-  document.getElementById('flowBase').innerText = b51.toFixed(2);
-  document.getElementById('flowReal').innerText = b52.toFixed(2);
-  document.getElementById('rotations').innerText = b53.toFixed(3);
+  const b53=Math.min(rotCandidate,rotMinMax);
 
-  // observations
-  let obs = "";
-  if(Number(document.getElementById('ph').value) < 6.5) obs = "pH muy bajo: Nitrospiras pueden verse afectadas. Revisa correcciones de pH.";
-  else obs = "Sistema equilibrado. Mantén monitoreo regular.";
-  document.getElementById('observations').innerText = obs;
+  document.getElementById('flowBase').innerText=b51.toFixed(2);
+  document.getElementById('flowReal').innerText=b52.toFixed(2);
+  document.getElementById('rotations').innerText=b53.toFixed(3);
+
+  // observations (MODIFICADO — SOLO ESTA PARTE)
+  let obs="";
+  if(Number(document.getElementById('ph').value)<6.5){
+    obs="pH muy bajo: Nitrospiras pueden verse afectadas. Revisa correcciones de pH.";
+  }
+  else if(Number(document.getElementById('temp').value)<22){
+    obs="Temperatura baja: por debajo de 22 °C la mayoría de especies tropicales entran en estrés. Ajusta el calentador.";
+  }
+  else{
+    obs="Sistema equilibrado. Mantén monitoreo regular.";
+  }
+  document.getElementById('observations').innerText=obs;
 }
 
 function resetAll(){
@@ -308,10 +306,10 @@ function resetAll(){
   void wrap.offsetWidth;
   wrap.classList.add('fade-reset');
 
-  document.querySelectorAll('input[type="number"]').forEach(el=> el.value = 0);
-  document.querySelectorAll('select').forEach(s=> s.selectedIndex = 0);
+  document.querySelectorAll('input[type="number"]').forEach(el=>el.value=0);
+  document.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
   const tbody=document.getElementById('speciesBody'); while(tbody.firstChild) tbody.removeChild(tbody.firstChild);
-  speciesCount = 0;
+  speciesCount=0;
   recalc();
 }
 
@@ -321,22 +319,21 @@ function attachRecalcListeners(){
     const el=document.getElementById(id);
     if(el){ el.addEventListener('input',recalc); el.addEventListener('change',recalc); }
   });
-  document.getElementById('speciesSelect').addEventListener('change', ()=>{});
+  document.getElementById('speciesSelect').addEventListener('change',()=>{});
 }
 
-document.addEventListener('DOMContentLoaded', ()=>{
+document.addEventListener('DOMContentLoaded',()=>{
   populateSelect();
-  document.getElementById('addSpecies').addEventListener('click', ()=> addSpeciesRow(document.getElementById('speciesSelect').value, false));
-  document.getElementById('resetBtn').addEventListener('click', resetAll);
+  document.getElementById('addSpecies').addEventListener('click',()=>addSpeciesRow(document.getElementById('speciesSelect').value,false));
+  document.getElementById('resetBtn').addEventListener('click',resetAll);
   attachRecalcListeners();
   recalc();
 });
-// Reset de la pagina al inicio 
-window.addEventListener("load", () => { 
-    resetAll();
-});
-// fin del reset
+
+window.addEventListener("load",()=>{ resetAll(); });
+
 </script>
 </body>
 </html>
+
 
